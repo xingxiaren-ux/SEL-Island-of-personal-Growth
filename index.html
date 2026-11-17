@@ -38,6 +38,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:b
 #knob{width:46px;height:46px;border-radius:50%;background:var(--ac);display:block;pointer-events:none}
 #act{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);display:none;font-weight:700}
 #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 130px);transform:translateX(-50%);max-width:90%;background:var(--pn);border:2px solid #f2b134;border-radius:14px;padding:8px 14px;z-index:8;display:none;text-align:center;font-size:.85rem}
+.xb{width:30px;height:30px;border-radius:50%;border:1px solid var(--bd);background:var(--pn);color:var(--tx);font:inherit;font-size:1rem;line-height:1;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+#sheet>.xb{position:sticky;top:0;float:right;margin:-4px -6px 4px 8px;z-index:3}
+#toast{padding-right:36px}#toast .xt{position:absolute;top:5px;right:5px;width:24px;height:24px;font-size:.8rem}
+#hint .xi{pointer-events:auto;width:22px;height:22px;font-size:.75rem;margin-left:8px;vertical-align:middle}
+#load .xl{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;background:rgba(255,255,255,.75);color:#134e4a}
 </style>
 </head>
 <body>
@@ -45,12 +50,12 @@ canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:b
 <div id="top" class="bar"><span class="brand">⛵ 心靈島</span><button class="tab on" data-t="all">全景</button><button class="tab" data-t="task">🎯 任務 <span id="prog">0/8</span></button><button class="tab" data-t="role">選擇角色</button><button class="tab" data-t="badge">🏅 徽章</button><span class="chip" id="pros">🌱 50%</span></div>
 <div id="chips" class="bar"></div>
 <div id="tags"></div>
-<div id="hint" class="chip" style="position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 92px);opacity:0;transition:opacity 1s;pointer-events:none;font-size:.78rem;text-align:center;z-index:5">🎮 WASD／方向鍵或搖桿移動 · 點地面走過去 · 拖曳轉視角 · E 互動</div>
+<div id="hint" class="chip" style="position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 92px);opacity:0;transition:opacity 1s;pointer-events:none;font-size:.78rem;text-align:center;z-index:5">🎮 WASD／方向鍵或搖桿移動 · 點地面走過去 · 拖曳轉視角 · E 互動<button class="xb xi" aria-label="關閉" onclick="this.parentNode.style.display='none'">✕</button></div>
 <div id="joy"><i id="knob"></i></div><button id="act" class="chip">💬 互動</button>
 <div id="toast"></div>
 <div id="sheet"></div>
 <div id="time" class="bar"><button class="chip" id="fx">🎆 煙火：開</button><button class="chip" id="pp">⏸</button><span class="chip" id="clk">12:00 白天</span><input id="sl" type="range" min="0" max="24" step="0.1" value="12" aria-label="時間"><button class="chip" id="sp">4×</button><button class="chip" id="now">現在</button></div>
-<div id="load"><div style="font-size:3rem">⛵</div><h1>SEL<br>成長島.</h1><div class="mut">一起來當島民吧 · 社會情緒學習</div><button id="go">準備出發</button></div>
+<div id="load"><div style="font-size:3rem">⛵</div><h1>SEL<br>成長島.</h1><div class="mut">一起來當島民吧 · 社會情緒學習</div><button id="go">準備出發</button><button class="xb xl" id="lx" aria-label="關閉">✕</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const ROLES={T:{n:"受困者",e:"🌧️",c:0x6c9bd1,d:"帶著情緒困境的人：練習覺察並說出自己的感受與需要。"},G:{n:"引導者",e:"🧭",c:0x4fae93,d:"傾聽與提問的人：反映情緒、開放提問，不急著給答案。"},S:{n:"解決問題者",e:"🛠️",c:0xe39a4f,d:"徵得同意再行動的人：先聽懂，再一起擬定小步驟。"}};
@@ -302,7 +307,7 @@ function openZone(i){st.cur=i;st.panel="zone";tab("task");const z=Z[i],r=ROLES[s
  if(z.k==="for"&&!dn)return openMirror(i);
  sheet.innerHTML=`<h2>${z.e} ${z.n}</h2><div class="mut">${z.a}　島民：${z.npc}</div><p>${z.s}</p><div class="tip"><b>${r.e} 你是${r.n}，試試看：</b><br>${z.t[st.role]}</div><p class="mut">反思篝火：${z.q}</p>`+(dn?`<div class="tip">🏅 已達成：${BDG[BZ[z.k]][1]}</div>`:`<button class="btn" id="fin">我做到了！</button>`);
  if(!dn)$("#fin").onclick=()=>finishZone(i,BZ[z.k])}
-function openTasks(){tab("task");st.panel="tasks";sheet.style.display="block";sheet.innerHTML=`<h2>🎯 島嶼任務</h2><div class="mut">走到各區域，依你選的角色完成任務，依你選的角色完成任務。</div>`+Z.map((z,i)=>`<button class="row" data-z="${i}">${z.e} <span><b>${z.n}</b> <span class="mut">${z.a}</span></span><span style="margin-left:auto">${st.done.has(i)?"🏅":"☁️"}</span></button>`).join("");
+function openTasks(){tab("task");st.panel="tasks";sheet.style.display="block";sheet.innerHTML=`<h2>🎯 島嶼任務</h2><div class="mut">走到各區域，依你選的角色完成任務。</div>`+Z.map((z,i)=>`<button class="row" data-z="${i}">${z.e} <span><b>${z.n}</b> <span class="mut">${z.a}</span></span><span style="margin-left:auto">${st.done.has(i)?"🏅":"☁️"}</span></button>`).join("");
  sheet.onclick=e=>{const b=e.target.closest("[data-z]");if(b)walkTo(+b.dataset.z)}}
 function openRoles(){tab("role");st.panel="roles";sheet.style.display="block";sheet.innerHTML=`<h2>選擇角色</h2><div class="mut">不同角色，看見的方法不同。</div>`+Object.entries(ROLES).map(([k,r])=>`<button class="row ${k===st.role?"on":""}" data-r="${k}"><span style="font-size:1.5rem">${r.e}</span><span><b>${r.n}</b><br><span class="mut">${r.d}</span></span></button>`).join("");
  sheet.onclick=e=>{const b=e.target.closest("[data-r]");if(b){st.role=b.dataset.r;openRoles()}}}
@@ -312,8 +317,8 @@ function upd(){$("#prog").textContent=st.done.size+"/8";$("#pros").textContent="
 // ===== 玩法模組：煙花、徽章、溫度計、後果鏡子、暴風雨事件 =====
 const BDG={detect:["🌡️","情緒偵探","你願意停下來標示情緒，還找出了觸發事件，這是自我覺察的第一步！"],calm:["🧘","成功控制怒氣","你在生氣時先暫停、深呼吸，讓自己冷靜下來，這就是努力！"],cheer:["📣","主動鼓勵夥伴","你主動關心並鼓勵別人，讓對方感到被支持。"],listen:["👂","專注傾聽","你放下手邊的事、專心聽完，讓對方覺得被在乎。"],mirror:["🪞","三思而後行","你先想過安全、道德標準和對他人的影響，才做決定。"],goal:["🎯","勇敢設定目標","你把大目標拆成小步驟，願意從第一步開始。"],win:["🤝","共創雙贏","你先聽懂雙方的需要，才一起找出彼此都能接受的辦法。"],bridge:["🌉","搭起理解之橋","你用換位思考與協商，讓分開的兩岸重新連在一起。"],link:["💬","勇敢說出感受","你說出了自己的感受與需要，不再獨自承擔。"],think:["🔄","換位思考","你先想像對方的感受，再回應他。"]};
 const BZ={bay:"detect",mtn:"calm",vil:"cheer",port:"link",for:"mirror",echo:"listen",tower:"goal",castle:"win"},NPB=["link","calm","cheer","link","mirror","listen"],EV={vil:false,castle:false};
-const $t=$("#toast");let tt;$t.onclick=e=>{if(e.target.dataset.fxoff!==undefined)$("#fx").click()};
-function toast(m){$t.innerHTML=m+(st.fx?'<br><a data-fxoff style="text-decoration:underline;cursor:pointer;font-size:.72rem;opacity:.8">🎆 關閉煙火</a>':"");$t.style.display="block";clearTimeout(tt);tt=setTimeout(()=>$t.style.display="none",4200)}
+const $t=$("#toast");let tt;$t.onclick=e=>{if(e.target.dataset.fxoff!==undefined)$("#fx").click();if(e.target.dataset.xt!==undefined){clearTimeout(tt);$t.style.display="none"}};
+function toast(m){$t.innerHTML=m+(st.fx?'<br><a data-fxoff style="text-decoration:underline;cursor:pointer;font-size:.72rem;opacity:.8">🎆 關閉煙火</a>':"")+'<button class="xb xt" data-xt aria-label="關閉">✕</button>';$t.style.display="block";clearTimeout(tt);tt=setTimeout(()=>$t.style.display="none",4200)}
 function award(b){if(!st.badges.has(b)){st.badges.add(b);toast(`🏅 獲得徽章：<b>${BDG[b][1]}</b><br>${BDG[b][2]}`)}}
 // 煙花
 const FW=[];
@@ -356,9 +361,9 @@ function quiz(title,story,hint,opts,win){const o=opts.map((x,k)=>({t:x[0],r:x[1]
 const STUB=new THREE.Group();[[-3.3,.15],[2,-.12]].forEach(([x,r])=>{const m=MS(BX(1.3*K,.18,1.3),mat(0xb07d4a),x*K,.52,5.8*K);m.rotation.z=r;STUB.add(m)});STUB.visible=false;scene.add(STUB);
 const STC=new THREE.Color(0x3b4452);
 const RAIN=(()=>{const N=800,g=new THREE.BufferGeometry(),p=new Float32Array(N*3);for(let i=0;i<N;i++){p[i*3]=R_(-20,20);p[i*3+1]=R_(0,22);p[i*3+2]=R_(-20,20)}g.setAttribute("position",new THREE.BufferAttribute(p,3));const m=new THREE.Points(g,new THREE.PointsMaterial({color:0xbfd8ff,size:.12,transparent:true,opacity:.7}));m.frustumCulled=false;m.visible=false;scene.add(m);return m})();
-const evEl=document.createElement("div");evEl.className="chip";evEl.style.cssText="position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 92px);display:none;z-index:5;font-size:.78rem;max-width:80%";document.body.appendChild(evEl);
-function evHud(){if(st.storm!==1){evEl.style.display="none";return}evEl.style.display="block";evEl.textContent=`⛈ 暴風雨！ ${EV.vil?"✅":"①"}共感村換位思考　${EV.castle?"✅":"②"}雙贏城堡協商　③回橋樑港搭橋`}
-function startStorm(){st.storm=1;BRIDGE.visible=false;STUB.visible=true;if(pl.z>BR.z-1.6&&pl.z<BR.z+1.6&&pl.x>BR.x0&&pl.x<BR.x1)pl.x=pl.x<(BR.x0+BR.x1)/2?BR.x0-1.5:BR.x1+1.5;st.panel="event";sheet.style.display="block";
+const evEl=document.createElement("div");evEl.className="chip";evEl.style.cssText="position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 92px);display:none;z-index:5;font-size:.78rem;max-width:80%";document.body.appendChild(evEl);evEl.onclick=e=>{if(e.target.dataset.xe!==undefined){st.hudOff=true;evEl.style.display="none"}};
+function evHud(){if(st.storm!==1||st.hudOff){evEl.style.display="none";return}evEl.style.display="block";evEl.innerHTML=`⛈ 暴風雨！ ${EV.vil?"✅":"①"}共感村換位思考　${EV.castle?"✅":"②"}雙贏城堡協商　③回橋樑港搭橋`+'<button class="xb" data-xe aria-label="關閉" style="margin-left:8px;width:22px;height:22px;font-size:.75rem;vertical-align:middle">✕</button>'}
+function startStorm(){st.hudOff=false;st.storm=1;BRIDGE.visible=false;STUB.visible=true;if(pl.z>BR.z-1.6&&pl.z<BR.z+1.6&&pl.x>BR.x0&&pl.x<BR.x1)pl.x=pl.x<(BR.x0+BR.x1)/2?BR.x0-1.5:BR.x1+1.5;st.panel="event";sheet.style.display="block";
  sheet.innerHTML=`<h2>⛈ 暴風雨襲擊橋樑港！</h2><p>狂風把木橋吹斷了，兩岸的訊息都傳不過去。</p><p>你和夥伴們要<b>組隊</b>出發：先到<b>共感村</b>練習換位思考，再到<b>雙贏城堡</b>學習協商，最後回到橋樑港重新搭起理解之橋。</p><div class="tip">🤝 另外兩位夥伴會跟在你身邊。</div><button class="btn" id="go2">出發！</button>`;$("#go2").onclick=()=>{sheet.style.display="none";st.panel=""};evHud()}
 function openEvent(k){st.panel="event";const r=ROLES[st.role],h=`${r.e} 你是${r.n}，夥伴們都在旁邊支持你。`;
  if(k==="vil")quiz("⛈ 換位思考","對岸的小海傳來訊息：「你們都不回我，是不是不管我了！」",h,[["「他怎麼這麼愛抱怨。」","大家沉默了，訊息變得更焦急。"],["「風雨太大了，沒辦法啦。」","小海：「喔……」但他還是很不安。"],["「他可能很害怕，覺得被丟下。先回應他的感受，告訴他我們正在想辦法。」","小海回覆：「謝謝你們，我不那麼害怕了。」"]],m=>{EV.vil=true;award("think");fireworks(3);evHud();sheet.innerHTML=`<h2>✅ 換位思考成功</h2><p>${m}</p><div class="fb" style="background:var(--ok);border-radius:10px;padding:8px 10px">🏅 ${BDG.think[1]}：${BDG.think[2]}</div><div class="mut">${EV.castle?"接著回到橋樑港搭橋！":"接著前往雙贏城堡。"}</div><button class="btn" id="o4">好！</button>`;$("#o4").onclick=()=>{sheet.style.display="none";st.panel=""}});
@@ -417,6 +422,12 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(clk.getDelta(),.05
  ren.render(scene,cam)}
 loop();
 $("#go").onclick=()=>{$("#load").style.opacity=0;setTimeout(()=>$("#load").remove(),700);C.d=80;Gl.d=18;st.follow=true;const h=$("#hint");h.style.opacity=1;setTimeout(()=>h.style.opacity=0,9000)};
+
+// ===== 關閉鍵（X）：面板、提示、事件列、開場畫面 =====
+function closeSheet(){sheet.style.display="none";if(st.panel==="npc")NP.forEach(n=>n.talk=false);st.panel="";document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t==="all"))}
+new MutationObserver(()=>{if(sheet.style.display!=="none"&&!(sheet.firstElementChild&&sheet.firstElementChild.classList.contains("xb"))){const b=document.createElement("button");b.className="xb";b.textContent="✕";b.setAttribute("aria-label","關閉");b.onclick=closeSheet;sheet.prepend(b)}}).observe(sheet,{childList:true,attributes:true,attributeFilter:["style"]});
+addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
+$("#lx").onclick=()=>$("#go").click();
 </script>
 </body>
 </html>
